@@ -1,0 +1,215 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+
+<!--Kendo ui elements-->
+<!--Here k-options is kendo angular directive-->
+<div class="row">
+    <div class="col-md-12">
+        <div id="example" ng-app="KendoGridDemo">
+            <h3>CRUD operations on Kendo grid using Angualr JS & webapi</h3>
+            <div ng-controller="Controller">
+                <kendo-grid k-options="mainGridOptions">
+                    <!--nested grid template start-->
+                    @*<div k-detail-template>
+                        <div>
+                            <div kendo-grid k-options="subgridOptions(dataItem)">
+                            </div>
+                        </div>
+                    </div>*@
+                    <!--nested grid template end-->
+                </kendo-grid>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        //Create a anular app and controller add kendo dependency to app
+        angular.module("KendoGridDemo", ["kendo.directives"])
+            .controller("Controller", function ($scope) {
+                //specify kendo grid options
+                $scope.mainGridOptions = {
+                    dataSource: {
+                        type: "json",   //data type
+                        transport: {
+                            destroy: {
+                                url: "/api/TStudentsAPI",
+                                type: "DELETE"
+                            }, read: {
+                                url: "/api/TStudentsAPI/Studs",
+                                type: "POST",
+                                contentType: "application/json"
+                            },
+                            create:
+                            {
+                                url: "/api/TStudentsAPI",
+                                type: "POST"
+                            },
+                            update:
+                            {
+                                url: "/api/TStudentsAPI",
+                                type: "PUT"
+                                
+                            },
+                            parameterMap: function (options, operation) {
+                                if (operation === "read") {
+                                    // convert the parameters to a json object
+                                    return kendo.stringify(options);
+                                }
+                                // if the current operation is an update
+                                //if (operation === "update") {
+                                //    // create a new JavaScript date object based on the current
+                                //    // BirthDate parameter value
+                                //    var d = new Date(options.BirthDate);
+                                //    // overwrite the BirthDate value with a formatted value that WebAPI
+                                //    // will be able to convert
+                                //    options.BirthDate = kendo.toString(new Date(d), "MM/dd/yyyy");
+                                //}
+                                // ALWAYS return options
+                                return options;
+                            }
+                        },
+                        schema: //schema of the table data
+                                 {
+                                     // the array of repeating data elements (employees)
+                                     data: "Data",
+                                     // the total count of records in the whole dataset. used
+                                     // for paging.
+                                     total: "Count",
+                                     model:
+                                     {
+                                         id: "StudentID",
+                                         fields: {
+                                             StudentID: { editable: false, nullable: false, type: "number" },
+                                             FullName: { editable: true, nullable: true, type: "string" },
+                                             Contact: { editable: true, nullable: true, type: "number" },
+                                             Country: { editable: true, nullable: true, type: "string" },
+                                             Designation: { editable: true, nullable: true, type: "string" }
+                                         }
+                                     },
+                                     // map the errors if there are any. this automatically raises the "error" 
+                                     // event
+                                     errors: "Errors"
+                                 },
+                        error: function (e) {
+                            console.log(e.statusText);
+                        },
+                        pageSize: 2,
+                        serverPaging: true,
+                        serverSorting: true
+                    },
+                    //add this code in maingrid options
+                    //dataBound: function () {
+                    //    this.expandRow(this.tbody.find("tr.k-master-row").first());
+                    //},
+                    editable: "popup",      //editable type popup/inline/batch
+                    toolbar: ["create"],    //toolbar options
+                    //sortable: {
+                    //    mode: "single",  //sorting
+                    //    allowUnsort:true
+                    //},
+                    // sort by multiple columns
+                    sortable: {
+                        mode: "multiple"
+                    },
+                    pageable: {          //paging
+                        buttonCount: 5
+                    },
+                    resizeable: true,       //resizing
+                    scrollable: false,
+                    // do paging on the server
+                    serverPaging: true,
+                    // do sorting on the server
+                    serverSorting: true,
+                    //specify columns that you want to display
+                    columns: [{
+                        field: "StudentID",
+                        title: "Student ID",
+                        width: "10px"
+                    },
+                    {
+                        field: "FullName",
+                        title: "FullName",
+                        width: "180px"
+                    },
+                    {
+                        field: "Contact",
+                        title: "Contact",
+                        width: "180px"
+                    },
+                    {
+                        field: "Country",
+                        title: "Country",
+                        width: "180px"
+                    },
+                    {
+                        field: "Designation",
+                        title: "Designation",
+                        width: "180px"
+                    },
+                    //actions columns contains-- edit/delete
+                        //{
+                        //    title:"Actions",
+                        //    command: ["edit",
+                        //    {
+                        //        name: "destroy",
+                        //        text: "Delete",
+                        //        width: "140px"
+                        //    }
+                        //    ],
+                        //}
+                    { command: ["edit", "destroy"], title: "Actions;", width: "250px" }
+                    ]
+                };
+
+                //nested grid oprtions
+                //$scope.subgridOptions = function (dataItem) {
+                //    return {
+                //        dataSource: {
+                //            type: "json",
+                //            transport: {
+                //                read: {
+                //                    url: "/api/TStudentsAPI/StudentDetails/" + dataItem.StudentID,
+                //                    dataType: "json"
+                //                }
+                //            },
+                //            serverPaging: true,
+                //            serverSorting: true,
+                //            serverFiltering: true,
+                //            pageSize: 5,
+                //        },
+                //        scrollable: false,
+                //        sortable: true,
+                //        pageable: true,
+                //        columns: [
+                //        {
+                //            field: "DetailsID",
+                //            title: "DetailsID",
+                //            width: "180px"
+                //        },
+                //        {
+                //            field: "CompanyName",
+                //            title: "Company Name",
+                //            width: "180px"
+                //        },
+                //        {
+                //            field: "Salary",
+                //            title: "Salary",
+                //            width: "180px"
+                //        },
+                //        {
+                //            field: "Location",
+                //            title: "Location",
+                //            width: "180px"
+                //        },
+
+                //        ]
+                //    }
+                //};
+
+            });
+</script>
+

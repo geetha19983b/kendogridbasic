@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using kendouiCURDbasic.Models;
+using System.Linq.Dynamic;
 
 namespace kendouiCURDbasic.Controllers
 {
@@ -51,6 +52,41 @@ namespace kendouiCURDbasic.Controllers
             {
                 return Request.CreateResponse(HttpStatusCode.OK, ex.Message, Configuration.Formatters.JsonFormatter);
             }
+        }
+        [HttpPost]
+        [Route("Studs")]
+        public HttpResponseMessage ServerRequest(Request request)
+        {
+            // compose the order by for sorting
+            string order = "StudentID";
+
+            // order the results
+            if (request.sort != null && request.sort.Count > 0)
+            {
+                List<string> sorts = new List<string>();
+                request.sort.ForEach(x => {
+                    sorts.Add(string.Format("{0} {1}", x.field, x.dir));
+                });
+
+                order = string.Join(",", sorts.ToArray());
+            }
+            // get all of the records from the employees table in the
+            // northwind database.  return them in a collection of user
+            // defined model objects for easy serialization. skip and then
+            // take the appropriate number of records for paging.
+            var studs = (from e in db.TStudents
+                        
+                         .OrderBy(order.ToString())
+                            .Skip(request.skip)
+                            .Take(request.take)
+                            
+                         select e).ToArray();
+
+            // returns the generic response object which will contain the 
+            // employees array and the total count
+           var resp =  new Models.Response(studs, db.TStudents.Count());
+
+            return Request.CreateResponse(HttpStatusCode.OK, resp);
         }
         // PUT: api/TStudents/5
         //[ResponseType(typeof(void))]

@@ -13,5 +13,9 @@ namespace kendouiCURDbasic.Controllers
         {
             return View();
         }
+        public ActionResult ServerIndex()
+        {
+            return View();
+        }
     }
 }
